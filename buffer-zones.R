@@ -1,46 +1,39 @@
 rm(list=ls())
 
 library(tidyverse)
-library(tidycensus)
-library(tigris)
 library(sf)
-library(tmap)
-
-ST <- 'SC'
-LOC <- 'Richland'
-utm <- 2150 ## NAD83 17N
-bf = 3
-
-ews <- data.frame(
-  place = 'ews',
-  longitude = -81.030066,
-  latitude = 33.995306)
-
-ews2 <- st_as_sf(ews, coords = c('longitude', 'latitude'), crs = 4326) %>%
-  st_transform(utm) # change to NAD83
-
-ews_b <- st_buffer(ews2, bf * 1609.34) %>%
-  st_transform(4326)
-
-# rd <- roads(ST, LOC) %>%
-#   st_as_sf() %>%
-#   st_transform(utm)
-# 
-# tm_shape(ews_b) + 
-#   tm_borders(col = 'red') + 
-# tm_shape(ews) + 
-#   tm_dots(col = 'red', size = 0.5) +
-# tm_shape(rd) + 
-#   tm_lines(col = 'RTTYP')
-
 library(leaflet)
 library(leaflet.extras)
 
-df <- st_transform(ews_b, 4326)
+## define variables
+utm <- 2150 ## NAD83 17N
+bd = c(0.5,1,1.5,2,2.5,3) ## define buffer distances
+
+loc <- data.frame(
+  place = 'loc',
+  longitude = -81.030066,
+  latitude = 33.995306)
+
+loc2 <- st_as_sf(loc, coords = c('longitude', 'latitude'), crs = 4326) %>%
+  st_transform(utm) # change to NAD83 with units of meters
+
+## loop buffer calculation & outpout as new data frame
+df <- NULL
+
+for(i in 1:length(bd)) {
+  OUT <- st_buffer(loc2, bd[[i]] * 1609.34) %>%
+    st_transform(4326) %>%
+    data.frame()
+  df <-rbind(OUT,df)
+}
+
+## reset geometry on loop output & reproject CRS for leaflet mapping
+df2 <- st_set_geometry(df, 'geometry') %>%
+  st_transform(4326)
 
 leaflet() %>%
   addTiles(group = 'Open Street Map') %>%
-  setView(lng = ews$longitude, lat = ews$latitude, zoom = 12) %>%
+  setView(lng = loc$longitude, lat = loc$latitude, zoom = 12) %>%
   addScaleBar('bottomright') %>%
-  addPolygons(data = df) %>%
-  addMarkers(data = ews)
+  addPolygons(data = df2) %>%
+  addMarkers(data = loc)
