@@ -29,11 +29,13 @@ for(i in 1:length(bd)) {
 
 ## reset geometry on loop output & reproject CRS for leaflet mapping
 df2 <- st_set_geometry(df, 'geometry') %>%
-  st_transform(4326)
+  st_transform(4326) %>%
+  mutate(id = bd)
 
 leaflet() %>%
   addTiles(group = 'Open Street Map') %>%
   setView(lng = loc$longitude, lat = loc$latitude, zoom = 12) %>%
   addScaleBar('bottomright') %>%
-  addPolygons(data = df2) %>%
+  addPolylines(data = df2, color = 'red', label = bd, weight = 2) %>%
+#  addLabelOnlyMarkers(data = df2, label = id) %>%
   addMarkers(data = loc)
