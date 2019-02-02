@@ -26,8 +26,12 @@ rd <- roads(ST, LOC) %>%
   st_transform(utm)
 
 tm_shape(ews_b) + 
-  tm_polygons() + 
+  tm_borders(col = 'red') + 
 tm_shape(ews) + 
-  tm_dots() +
+  tm_dots(col = 'red', size = 0.5) +
 tm_shape(rd) + 
-  tm_lines()
+  tm_lines(col = 'RTTYP')
+
+library(leaflet)
+library(leaflet.extras)
+
