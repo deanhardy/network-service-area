@@ -4,6 +4,10 @@ library(tidyverse)
 library(sf)
 library(leaflet)
 library(leaflet.extras)
+library(mapview)
+
+#define data directory
+datadir <- file.path('C:/Users/dhardy/Dropbox/r_data/network-service-area')
 
 ## define variables
 utm <- 2150 ## NAD83 17N
@@ -32,10 +36,13 @@ df2 <- st_set_geometry(df, 'geometry') %>%
   st_transform(4326) %>%
   mutate(id = bd)
 
-leaflet() %>%
+m <- leaflet() %>%
   addTiles(group = 'Open Street Map') %>%
-  setView(lng = loc$longitude, lat = loc$latitude, zoom = 12) %>%
+  setView(lng = loc$longitude, lat = loc$latitude, zoom = 13) %>%
   addScaleBar('bottomright') %>%
   addPolylines(data = df2, color = 'red', label = bd, weight = 2) %>%
 #  addLabelOnlyMarkers(data = df2, label = id) %>%
   addMarkers(data = loc)
+
+mapshot(m, file = 'ews-buf-distances.png')
+        
